@@ -10,6 +10,7 @@ class Cliente(db.Model):
     telefono = db.Column(db.String(15))
     direccion = db.Column(db.String(255))
     fecha_registro = db.Column(db.DateTime, default=db.func.current_timestamp())
+    password = db.Column(db.String(255), nullable=False)
 
 class Vino(db.Model):
     __tablename__ = 'vinos'
@@ -28,6 +29,7 @@ class Pedido(db.Model):
     fecha_pedido = db.Column(db.DateTime, default=db.func.current_timestamp())
     total = db.Column(db.Numeric(10, 2), nullable=False)
     estado = db.Column(db.String(50), default='pendiente')
+    detalles = db.relationship('DetallePedido', backref='pedido', lazy=True)
 
 class DetallePedido(db.Model):
     __tablename__ = 'detalle_pedidos'
@@ -35,6 +37,7 @@ class DetallePedido(db.Model):
     id_pedido = db.Column(db.Integer, db.ForeignKey('pedidos.id_pedido', ondelete='CASCADE'))
     id_vino = db.Column(db.Integer, db.ForeignKey('vinos.id_vino'))
     cantidad = db.Column(db.Integer, nullable=False)
+    vino = db.relationship('Vino', backref='pedido_detalles')
     precio_unitario = db.Column(db.Numeric(10, 2), nullable=False)
 
 class Factura(db.Model):
