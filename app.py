@@ -1,13 +1,15 @@
 from flask import Flask, request, jsonify, render_template, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from config import Config
-from models import db, Vino
+from models import db, Vino, Cliente, Pedido, DetallePedido
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     db.init_app(app)
+    migrate = Migrate(app, db)
 
     with app.app_context():
         db.create_all()
@@ -25,29 +27,34 @@ def create_app():
     def eventos():
         return render_template('Eventos.html')
 
-    @app.route('/register', methods=['POST'])
+    @app.route('/register', methods=['GET', 'POST'])
     def register():
-        data = request.get_json()
-        hashed_password = generate_password_hash(data['password'], method = 'sha256')
-        new_cliente = Cliente(
-            nombre=data['nombre'],
-            email=data['email'],
-            telefono=data.get('telefono'),
-            direccion=data.get('direccion'),
-            password = hashed_password
-        )
-        db.session.add(new_cliente)
-        db.session.commit()
-        return jsonify({'message':'Cliente registrado exitosamente'})
-    
-    @app.route('/login', methods=['POST']) #DEBEMOS MODIFICAR PARA GENERAR FACTURA CADA QUE SE REALIZA UN PEDIDO
-        data = request.get_json()
-        cliente = Cliente.query.filter_by(email=data['email']).first()
-        if cliente and check_password_hash(cliente.password, data['password']):
-            session['cliente_id'] = cliente.id_cliente
-            return jsonify({'message': 'Inicio de sesión exitoso'})
-        return jsonify({'message': 'Email o contraseña incorrectos'}), 401
-    
+        if request.method == 'POST':
+            data = request.form
+            hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
+            new_cliente = Cliente(
+                nombre=data['nombre'],
+                email=data['email'],
+                telefono=data.get('telefono'),
+                direccion=data.get('direccion'),
+                password=hashed_password
+            )
+            db.session.add(new_cliente)
+            db.session.commit()
+            return jsonify({'message': 'Cliente registrado exitosamente'})
+        return render_template('Registro.html')
+
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+        if request.method == 'POST':
+            data = request.form
+            cliente = Cliente.query.filter_by(email=data['email']).first()
+            if cliente and check_password_hash(cliente.password, data['password']):
+                session['cliente_id'] = cliente.id_cliente
+                return jsonify({'message': 'Inicio de sesión exitoso'})
+            return jsonify({'message': 'Email o contraseña incorrectos'}), 401
+        return render_template('Login.html')
+
     @app.route('/pedido', methods=['POST'])
     def realizar_pedido():
         data = request.get_json()
@@ -64,41 +71,41 @@ def create_app():
             vino = Vino.query.get(item['id_vino'])
             if not vino or vino.cantidad < item['cantidad']:
                 return jsonify({'message': f'El vino con id {item["id_vino"]} no está disponible en la cantidad solicitada'}), 400
-            total+= vino.precio * item['cantidad']
+            total += vino.precio * item['cantidad']
         
-        new_pedido = Pedido(id_cliente = cliente_id, total=total, estado='pendiente')
+        new_pedido = Pedido(id_cliente=cliente_id, total=total, estado='pendiente')
         db.session.add(new_pedido)
         db.session.commit()
 
         for item in vinos_pedidos:
             detalle = DetallePedido(
-                id_pedido = new_pedido.id_pedido,
-                id_vino = item['id_vino'],
-                cantidad = item['cantidad']
+                id_pedido=new_pedido.id_pedido,
+                id_vino=item['id_vino'],
+                cantidad=item['cantidad']
             )
             db.session.add(detalle)
             vino = Vino.query.get(item['id_vino'])
-            vino.cantidad -= item['cantidad']   #Aquí reducimos stock
+            vino.cantidad -= item['cantidad']  # Aquí reducimos stock
             db.session.commit()
         
         return jsonify({'message': 'Pedido realizado exitosamente'})
-    
-    @app.route('/wines' methods=['POST'])
+
+    @app.route('/wines', methods=['POST'])
     def agregar_vino():
         data = request.get_json()
         new_vino = Vino(
-            nombre = data['nombre'],
-            tipo = data.get('tipo'),
-            precio = data['precio'],
-            cantidad = data['cantidad'],
-            descripcion = data.get('descripcion'),
-            imagen_url = data.get('imagen_url')
+            nombre=data['nombre'],
+            tipo=data.get('tipo'),
+            precio=data['precio'],
+            cantidad=data['cantidad'],
+            descripcion=data.get('descripcion'),
+            imagen_url=data.get('imagen_url')
         )
         db.session.add(new_vino)
         db.session.commit()
         return jsonify({'message': 'Vino agregado exitosamente'})
 
-    @app.route('/wines/<int:id_vino>' methods=['PUT'])
+    @app.route('/wines/<int:id_vino>', methods=['PUT'])
     def actualizar_vino(id_vino):
         data = request.get_json()
         vino = Vino.query.get_or_404(id_vino)
@@ -117,8 +124,8 @@ def create_app():
         
         db.session.commit()
         return jsonify({'message': 'Vino actualizado exitosamente'})
-    
-    @app.route('/wines/<int:id_vino>/stock' methods=['PUT'])
+
+    @app.route('/wines/<int:id_vino>/stock', methods=['PUT'])
     def actualizar_stock(id_vino):
         data = request.get_json()
         vino = Vino.query.get_or_404(id_vino)
@@ -127,7 +134,6 @@ def create_app():
             db.session.commit()
             return jsonify({'message': 'Stock actualizado exitosamente'})
         return jsonify({'message': 'La cantidad de stock es requerida'}), 400
-
 
     return app
 
