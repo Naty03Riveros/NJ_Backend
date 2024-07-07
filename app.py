@@ -51,9 +51,11 @@ def create_app():
             cliente = Cliente.query.filter_by(email=data['email']).first()
             if cliente and check_password_hash(cliente.password, data['password']):
                 session['cliente_id'] = cliente.id_cliente
+                session['cliente_nombre'] = cliente.nombre  # Guarda el nombre del cliente en la sesión
                 return jsonify({'message': 'Inicio de sesión exitoso'})
             return jsonify({'message': 'Email o contraseña incorrectos'}), 401
         return render_template('Login.html')
+
 
     @app.route('/pedido', methods=['POST'])
     def realizar_pedido():
