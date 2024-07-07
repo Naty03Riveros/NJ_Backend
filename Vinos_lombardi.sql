@@ -7,6 +7,8 @@ CREATE TABLE clientes (
     telefono VARCHAR(15),
     direccion VARCHAR(255),
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    
+    
 );
 CREATE TABLE vinos (
     id_vino INT AUTO_INCREMENT PRIMARY KEY,
