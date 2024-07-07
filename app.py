@@ -90,6 +90,57 @@ def create_app():
         
         return jsonify({'message': 'Pedido realizado exitosamente'})
 
+    @app.route('/pedido/<int:id_pedido>/state', methods=['PUT'])
+    def actualizar_estado(id_pedido):
+        data = request.get_json()
+        pedido = Pedido.query.get_or_404(id_pedido)
+        if 'estado' in data:
+            pedido.estado = data['estado']
+            db.session.commit()
+            return jsonify({'message': 'Estado actualizado exitosamente'})
+        return jsonify({'message': 'No se pudo actualizar el estado del pedido'}), 400
+
+    @app.route('/pedido/<int:id_pedido>', methods=['DELETE'])
+    def eliminar_pedido(id_pedido):
+        pedido = Pedido.query.get_or_404(id_pedido)
+        db.session.delete(pedido)
+        db.session.commit()
+        return jsonify({'message': 'Pedido eliminado exitosamente'})
+    
+    @app.route('/pedidos', methods=['GET'])
+    def listar_pedidos():
+        pedidos = Pedido.query.all()
+        resultado = []
+        for pedido in pedidos:
+            detalles = DetallePedido.query.filter_by(id_pedido=pedido.id_pedido).all()
+            detalle_pedidos = [{'id_vino': d.id_vino, 'cantidad': d.cantidad} for d in detalles]
+            resultado.append({
+                'id_pedido': pedido.id_pedido,
+                'id_cliente': pedido.id_cliente,
+                'fecha_pedido': pedido.fecha_pedido,
+                'total': pedido.total,
+                'estado': pedido.estado,
+                'detalles': detalles_pedido
+            })
+        return jsonify(resultado)
+
+    @app.route('/pedidos/<int:id_cliente>', methods=['GET'])
+    def listar_pedidos_cliente(id_cliente):
+        pedidos = Pedido.query.filter_by(id_cliente=id_cliente).all()
+        resultado = []
+        for pedido in pedidos:
+            detalles = DetallePedido.query.filter_by(id_pedido=pedido.id_pedido).all()
+            detalle_pedidos = [{'id_vino': d.id_vino, 'cantidad': d.cantidad} for d in detalles]
+            resultado.append({
+                'id_pedido': pedido.id_pedido,
+                'id_cliente': pedido.id_cliente,
+                'fecha_pedido': pedido.fecha_pedido,
+                'total': pedido.total,
+                'estado': pedido.estado,
+                'detalles': detalles_pedido
+            })
+        return jsonify(resultado)
+
     @app.route('/wines', methods=['POST'])
     def agregar_vino():
         data = request.get_json()
