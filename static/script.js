@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch('/orders', {
+            const response = await fetch('/pedido', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
