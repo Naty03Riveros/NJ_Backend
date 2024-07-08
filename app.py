@@ -56,6 +56,11 @@ def create_app():
             return jsonify({'message': 'Email o contraseña incorrectos'}), 401
         return render_template('Login.html')
 
+    @app.route('/logout')
+    def logout():
+        session.pop('cliente_id', None)
+        session.pop('cliente_nombre', None)
+        return jsonify({'message': 'Sesión cerrada exitosamente'})
 
     @app.route('/pedido', methods=['POST'])
     def realizar_pedido():
@@ -122,7 +127,7 @@ def create_app():
                 'fecha_pedido': pedido.fecha_pedido,
                 'total': pedido.total,
                 'estado': pedido.estado,
-                'detalles': detalles_pedido
+                'detalles': detalle_pedidos
             })
         return jsonify(resultado)
 
@@ -139,7 +144,7 @@ def create_app():
                 'fecha_pedido': pedido.fecha_pedido,
                 'total': pedido.total,
                 'estado': pedido.estado,
-                'detalles': detalles_pedido
+                'detalles': detalle_pedidos
             })
         return jsonify(resultado)
 
