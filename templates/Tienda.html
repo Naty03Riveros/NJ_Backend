@@ -50,22 +50,22 @@
                         <input class="form-control me-2" type="search" placeholder="Buscar productos..." aria-label="Buscar" id="searchBar">
                         <button class="btn btn-outline-light rounded-pill" type="submit">Buscar</button>
                     </form>
-                    <a class="nav-link text-white" href="#" id="cartIcon"><i class="fas fa-shopping-cart"></i> Ver Carrito</a>
+                    <a class="nav-link text-white" href="#" id="cartIcon"><i class="fas fa-shopping-cart"></i> Carrito</a>
                 </div>
                 <div class="ml-auto">
                     <ul class="navbar-nav">
                         {% if session.get('cliente_nombre') %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="Login.html">{{ session['cliente_nombre'] }}</a>
-                            </li>
-                        {% else %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="Login.html">Mi cuenta</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="Registro.html">Registrarse</a>
-                            </li>
-                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">{{ session['cliente_nombre'] }}</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="Login.html">Mi cuenta</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="Registro.html">Registrarse</a>
+                        </li>
+                    {% endif %}
                     </ul>
                 </div>
             </div>
