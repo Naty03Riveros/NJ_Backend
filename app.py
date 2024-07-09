@@ -26,6 +26,10 @@ def create_app():
     @app.route('/eventos')
     def eventos():
         return render_template('Eventos.html')
+    
+    @app.route('/cart')
+    def cart():
+        return 'Esta es la página del carrito.'
 
     @app.route('/register', methods=['GET', 'POST'])
     def register():
