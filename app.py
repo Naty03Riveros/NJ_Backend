@@ -61,7 +61,9 @@ def create_app():
         session.pop('cliente_id', None)
         session.pop('cliente_nombre', None)
         return jsonify({'message': 'Sesión cerrada exitosamente'})
-
+    
+    
+    # Inicio de pedido
     @app.route('/pedido', methods=['POST'])
     def realizar_pedido():
         data = request.get_json()
@@ -182,6 +184,7 @@ def create_app():
         
         db.session.commit()
         return jsonify({'message': 'Vino actualizado exitosamente'})
+    
 
     @app.route('/wines/<int:id_vino>/stock', methods=['PUT'])
     def actualizar_stock(id_vino):
@@ -192,6 +195,39 @@ def create_app():
             db.session.commit()
             return jsonify({'message': 'Stock actualizado exitosamente'})
         return jsonify({'message': 'La cantidad de stock es requerida'}), 400
+    
+    # Ruta para agregar productos al carrito
+    @app.route('/add-to-cart', methods=['POST'])
+    def add_to_cart():
+        data = request.get_json()
+        cliente_id = session.get('cliente_id')
+        if not cliente_id:
+            return jsonify({'message': 'Debe iniciar sesión para agregar productos al carrito'}), 401
+        
+        vino_id = data.get('vino_id')
+        cantidad = data.get('cantidad')
+
+        # Verificar si el vino existe y hay suficiente stock
+        vino = Vino.query.get(vino_id)
+        if not vino:
+            return jsonify({'message': 'Vino no encontrado'}), 404
+
+        if vino.cantidad < cantidad:
+            return jsonify({'message': 'Stock insuficiente para este vino'}), 400
+
+        # Crear o actualizar el carrito del cliente (asumimos que solo puede haber un pedido pendiente por cliente)
+        pedido_pendiente = Pedido.query.filter_by(id_cliente=cliente_id, estado='pendiente').first()
+        if not pedido_pendiente:
+            pedido_pendiente = Pedido(id_cliente=cliente_id, estado='pendiente', total=0)
+            db.session.add(pedido_pendiente)
+            db.session.commit()
+
+        # Crear el detalle del pedido (carrito)
+        detalle_pedido = DetallePedido(id_pedido=pedido_pendiente.id_pedido, id_vino=vino_id, cantidad=cantidad)
+        db.session.add(detalle_pedido)
+        db.session.commit()
+
+        return jsonify({'message': 'Producto agregado al carrito exitosamente'}), 200
 
     return app
 
