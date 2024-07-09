@@ -34,13 +34,13 @@
                             <a class="nav-link active" aria-current="page" href="#">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="Tienda.html">Tienda</a>
+                            <a class="nav-link" href="{{ url_for('tienda') }}">Tienda</a>
                         </li>
                         <a class="navbar-brand d-none d-md-block" href="#">
                             <img src="{{ url_for('static', filename='src/nuevo_logo_negro.webp') }}" alt="">
                         </a>
                         <li class="nav-item">
-                            <a class="nav-link" href="Eventos.html">Eventos</a>
+                            <a class="nav-link" href="{{ url_for('eventos') }}">Eventos</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#club-section">Contactos</a>
@@ -58,10 +58,10 @@
                             </li>
                         {% else %}
                             <li class="nav-item">
-                                <a class="nav-link" href="Login.html">Mi cuenta</a>
+                                <a class="nav-link" href="{{ url_for('login') }}">Mi cuenta</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="Registro.html">Registrarse</a>
+                                <a class="nav-link" href="{{ url_for('register') }}">Registrarse</a>
                             </li>
                         {% endif %}
                     </ul>
@@ -121,14 +121,14 @@
                     </div>
                     <div class="col-md-6 position-relative">
                         <img src="{{ url_for('static', filename='src/Lombardi_montañas.webp') }}" class="tip_vinos img-fluid" alt="tipos de vinos">
-                        <a href="Tienda.html" class="cta-button">COMPRAR</a>
+                        <a href="{{ url_for('tienda') }}" class="cta-button">COMPRAR</a>
                     </div>
                 </div>
             </div>
         </div>
     
         <!-- Inspiration Section -->
-        <div class="inspiration-section text-center d-flex align-items-center" style ='background-image: url("{{ url_for('static', filename='src/logoig.webp') }}"); background-size: cover; background-position: center; height: 400px;'>
+        <div class="inspiration-section text-center d-flex align-items-center" style='background-image: url("{{ url_for('static', filename='src/Vinos_lombardi.webp') }}"); background-size: cover; background-position: center; height: 400px;'>
             <div class="container">
                 <h2 class="display-4 inspiration-text">"El vino es la respuesta a todo. No recuerdo la pregunta."</h2>
                 <p class="lead inspiration-text">- Anónimo</p>

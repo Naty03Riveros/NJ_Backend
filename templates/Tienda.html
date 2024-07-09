@@ -28,10 +28,10 @@
                 <ul class="navbar-nav me-auto"></ul> 
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="Index.html">Home</a>
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('index') }}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="Tienda.html">Tienda</a>
+                        <a class="nav-link" href="{{ url_for('tienda') }}">Tienda</a>
                     </li>
                     <li class="nav-item">
                         <a class="navbar-brand d-none d-md-block" href="#">
@@ -39,7 +39,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="Eventos.html">Eventos</a>
+                        <a class="nav-link" href="{{ url_for('eventos') }}">Eventos</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="index.html#club-section">Contactos</a>
@@ -57,14 +57,14 @@
                     <ul class="navbar-nav">
                         {% if session.get('cliente_nombre') %}
                         <li class="nav-item">
-                            <a class="nav-link" href="#">{{ session['cliente_nombre'] }}</a>
+                            <a class="nav-link" href="{{ url_for('logout') }}">Cerrar sesión</a>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="Login.html">Mi cuenta</a>
+                            <a class="nav-link" href="{{ url_for('login') }}">Mi cuenta</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="Registro.html">Registrarse</a>
+                            <a class="nav-link" href="{{ url_for('register') }}">Registrarse</a>
                         </li>
                     {% endif %}
                     </ul>
@@ -112,8 +112,9 @@
         
         <!---Sección productos-->
         <div class="products row">
-            <div class="col-md-3 product d-flex flex-column align-items-center" data-name="Vino 1" data-price="15">
-                <img src="{{ url_for('static', filename='src/red.webp') }}" alt="Vino 1" class="img-fluid">
+            {% for vino in vinos %}
+            <div class="col-md-3 product d-flex flex-column align-items-center" data-id="{{ vino.id_vino }}" data-name="{{ vino.nombre }}" data-price="{{ vino.precio }}">
+                <img src="{{ vino.imagen_url }}" alt="{{ vino.nombre }}" class="img-fluid">
                 <button class="btn btn-grey mt-2 add-to-cart">Agregar</button>
                 <div class="quantity-controls mt-2 d-flex align-items-center">
                     <button class="btn btn-outline-secondary decrease">-</button>
@@ -121,33 +122,7 @@
                     <button class="btn btn-outline-secondary increase">+</button>
                 </div>
             </div>
-            <div class="col-md-3 product d-flex flex-column align-items-center" data-name="Vino 2" data-price="20">
-                <img src="{{ url_for('static', filename='src/Chador_lombardi.webp') }}" alt="Vino 3" class="img-fluid">
-                <button class="btn btn-grey mt-2 add-to-cart">Agregar</button>
-                <div class="quantity-controls mt-2 d-flex align-items-center">
-                    <button class="btn btn-outline-secondary decrease">-</button>
-                    <span class="quantity mx-2">1</span>
-                    <button class="btn btn-outline-secondary increase">+</button>
-                </div>
-            </div>
-            <div class="col-md-3 product d-flex flex-column align-items-center" data-name="Vino 3" data-price="25">
-                <img src="{{ url_for('static', filename='src/rose.png') }}" alt="Vino 3" class="img-fluid">
-                <button class="btn btn-grey mt-2 add-to-cart">Agregar</button>
-                <div class="quantity-controls mt-2 d-flex align-items-center">
-                    <button class="btn btn-outline-secondary decrease">-</button>
-                    <span class="quantity mx-2">1</span>
-                    <button class="btn btn-outline-secondary increase">+</button>
-                </div>
-            </div>
-            <div class="col-md-3 product d-flex flex-column align-items-center" data-name="Vino 4" data-price="30">
-                <img src="{{ url_for('static', filename='src/gran reserva.png') }}" alt="Vino 4" class="img-fluid">
-                <button class="btn btn-grey mt-2 add-to-cart">Agregar</button>
-                <div class="quantity-controls mt-2 d-flex align-items-center">
-                    <button class="btn btn-outline-secondary decrease">-</button>
-                    <span class="quantity mx-2">1</span>
-                    <button class="btn btn-outline-secondary increase">+</button>
-                </div>
-            </div>
+            {% endfor %}
         </div>
     
         <!---Sección carrito -ecommerce-->

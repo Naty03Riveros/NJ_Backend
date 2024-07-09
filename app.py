@@ -74,34 +74,44 @@ def create_app():
         cliente_id = session.get('cliente_id')
         if not cliente_id:
             return jsonify({'message': 'Debe iniciar sesión para realizar un pedido'}), 401
-        
+
         vinos_pedidos = data.get('vinos', [])
         if not vinos_pedidos:
             return jsonify({'message': 'Debe especificar los vinos a pedir'})
-        
+
         total = 0
         for item in vinos_pedidos:
             vino = Vino.query.get(item['id_vino'])
             if not vino or vino.cantidad < item['cantidad']:
                 return jsonify({'message': f'El vino con id {item["id_vino"]} no está disponible en la cantidad solicitada'}), 400
             total += vino.precio * item['cantidad']
-        
-        new_pedido = Pedido(id_cliente=cliente_id, total=total, estado='pendiente')
-        db.session.add(new_pedido)
-        db.session.commit()
 
-        for item in vinos_pedidos:
-            detalle = DetallePedido(
-                id_pedido=new_pedido.id_pedido,
-                id_vino=item['id_vino'],
-                cantidad=item['cantidad']
-            )
-            db.session.add(detalle)
-            vino = Vino.query.get(item['id_vino'])
-            vino.cantidad -= item['cantidad']  # Aquí reducimos stock
+        try:
+            new_pedido = Pedido(id_cliente=cliente_id, total=total, estado='pendiente')
+            db.session.add(new_pedido)
+            db.session.flush()  # Flush para obtener el ID del nuevo pedido antes de hacer commit
+
+            for item in vinos_pedidos:
+                detalle = DetallePedido(
+                    id_pedido=new_pedido.id_pedido,
+                    id_vino=item['id_vino'],
+                    cantidad=item['cantidad'],
+                    precio_unitario=Vino.query.get(item['id_vino']).precio  # Precio unitario
+                )
+                db.session.add(detalle)
+                vino.cantidad -= item['cantidad']  # Reducir el stock del vino
+            
+            db.session.commit()  # Confirmar todas las operaciones en una sola transacción
+            return jsonify({'message': 'Pedido realizado exitosamente', 'order_id': new_pedido.id_pedido})
+        except Exception as e:
+            db.session.rollback()  # Revertir en caso de error
+            return jsonify({'message': 'Error al realizar el pedido', 'error': str(e)}), 500
+            
             db.session.commit()
-        
-        return jsonify({'message': 'Pedido realizado exitosamente'})
+            return jsonify({'message': 'Pedido realizado exitosamente'})
+        except Exception as e:
+            db.session.rollback()  # Revertir en caso de error
+            return jsonify({'message': 'Error al realizar el pedido', 'error': str(e)}), 500
 
     @app.route('/pedido/<int:id_pedido>/state', methods=['PUT'])
     def actualizar_estado(id_pedido):
@@ -133,7 +143,7 @@ def create_app():
                 'fecha_pedido': pedido.fecha_pedido,
                 'total': pedido.total,
                 'estado': pedido.estado,
-                'detalles': detalle_pedidos
+                'detalles': detalles_pedido
             })
         return jsonify(resultado)
 
@@ -150,7 +160,7 @@ def create_app():
                 'fecha_pedido': pedido.fecha_pedido,
                 'total': pedido.total,
                 'estado': pedido.estado,
-                'detalles': detalle_pedidos
+                'detalles': detalles_pedido
             })
         return jsonify(resultado)
 

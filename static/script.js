@@ -5,16 +5,22 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.add-to-cart').forEach(button => {
         button.addEventListener('click', function () {
             const productElement = this.closest('.product');
+            const productId = parseInt(productElement.getAttribute('data-id'));
             const productName = productElement.getAttribute('data-name');
             const productPrice = parseFloat(productElement.getAttribute('data-price'));
             const productQuantity = parseInt(productElement.querySelector('.quantity').innerText);
 
-            const productInCart = cart.find(item => item.name === productName);
+            if (isNaN(productId)) {
+                console.error("ID del producto es inválido");
+                return;
+            }
+
+            const productInCart = cart.find(item => item.id === productId);
 
             if (productInCart) {
                 productInCart.quantity += productQuantity;
             } else {
-                cart.push({ name: productName, price: productPrice, quantity: productQuantity });
+                cart.push({ id: productId, name: productName, price: productPrice, quantity: productQuantity });
             }
 
             updateCartModal();
@@ -22,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Funciones de incremento y decremento
     document.querySelectorAll('.increase').forEach(button => {
         button.addEventListener('click', function () {
             const quantityElement = this.closest('.quantity-controls').querySelector('.quantity');
@@ -52,12 +59,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
+            const vinos = cart.map(item => ({
+                id_vino: item.id,
+                cantidad: item.quantity
+            }));
+
             const response = await fetch('/pedido', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ products: cart })
+                body: JSON.stringify({ vinos })
             });
 
             if (!response.ok) {
