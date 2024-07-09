@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const cart = [];
     const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+    let pedidosModal;
 
     document.querySelectorAll('.add-to-cart').forEach(button => {
         button.addEventListener('click', function () {
@@ -152,6 +153,45 @@ document.addEventListener('DOMContentLoaded', () => {
             const productName = product.getAttribute('data-name').toLowerCase();
             product.style.display = productName.includes(searchTerm) ? 'block' : 'none';
         });
+    });
+
+    document.getElementById('verPedidos').addEventListener('click', function () {
+        const idCliente = 2/* Aquí debes obtener el ID del cliente, puedes pasarlo desde el backend o almacenarlo en tu frontend */;
+        
+        fetch(`/pedidos/${idCliente}`)
+            .then(response => response.json())
+            .then(pedidos => {
+                const modalBody = document.getElementById('pedidosModalBody');
+                modalBody.innerHTML = ''; // Limpiamos el modal
+
+                // Iterar sobre los pedidos y agregarlos al modal
+                pedidos.forEach(pedido => {
+                    const pedidoItem = document.createElement('div');
+                    pedidoItem.classList.add('pedido-item');
+
+                    const total = typeof pedido.total === 'number' ? pedido.total.toFixed(2) : 'N/A';
+
+                    pedidoItem.innerHTML = `
+                        <h5>Pedido ID: ${pedido.id_pedido}</h5>
+                        <p>Fecha del Pedido: ${pedido.fecha_pedido}</p>
+                        <p>Total: $${total}</p>`
+                        /*<ul>
+                            ${pedido.detalles.map(detalle => `<li>${detalle.id_vino} - Cantidad: ${detalle.cantidad}</li>`).join('')}
+                        </ul>*/
+                    ;
+                    modalBody.appendChild(pedidoItem);
+                });
+
+                // Mostrar el modal de pedidos
+                if (!pedidosModal) {
+                    pedidosModal = new bootstrap.Modal(document.getElementById('pedidosModal'));
+                }
+                pedidosModal.show(); // Mostrar el modal
+            })
+            .catch(error => {
+                console.error('Error al obtener los pedidos:', error);
+                alert('Error al cargar los pedidos. Por favor, inténtalo de nuevo más tarde.');
+            });
     });
 
     updateCartIcon();

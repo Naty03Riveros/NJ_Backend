@@ -160,7 +160,7 @@ def create_app():
                 'fecha_pedido': pedido.fecha_pedido,
                 'total': pedido.total,
                 'estado': pedido.estado,
-                'detalles': detalles_pedido
+                #'detalles': detalles_pedido
             })
         return jsonify(resultado)
 
