@@ -100,7 +100,7 @@
         </div>
         
         <!-- History Section -->
-        <div class="history" style='background-image: url("{{ url_for('static', filename='src/back_ground_historico_final_2_final.webp') }}");'>
+        <div class="history" style="background-image: url('{{ url_for('static', filename='back_ground_historico_final_2_final.webp') }}');">
             <div class="container">
                 <div class="historia" id="history">
                     <h2>Nuestra historia</h2>
@@ -142,7 +142,7 @@
                 <div class="row g-0">
                     <div class="col-md-6 position-relative">
                         <img src="{{ url_for('static', filename='src/Lombardi_eventos_mujer.webp') }}" class="img-fluid" alt="Eventos privados">
-                        <a href="Eventos.html" class="cta-button">RESERVAR</a>
+                        <a href="{{ url_for('eventos') }}" class="cta-button">RESERVAR</a>
                     </div>
                     <div class="col-md-6 d-flex align-items-center justify-content-center">
                         <div class="p-5 text-center">

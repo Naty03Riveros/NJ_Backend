@@ -56,7 +56,8 @@ def create_app():
             if cliente and check_password_hash(cliente.password, data['password']):
                 session['cliente_id'] = cliente.id_cliente
                 session['cliente_nombre'] = cliente.nombre  # Guarda el nombre del cliente en la sesión
-                return jsonify({'message': 'Inicio de sesión exitoso'})
+                next_url = data.get('next', url_for('index'))
+                return redirect(next_url)
             return jsonify({'message': 'Email o contraseña incorrectos'}), 401
         return render_template('Login.html')
 
