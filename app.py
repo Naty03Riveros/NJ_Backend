@@ -103,15 +103,11 @@ def create_app():
             
             db.session.commit()  # Confirmar todas las operaciones en una sola transacción
             return jsonify({'message': 'Pedido realizado exitosamente', 'order_id': new_pedido.id_pedido})
+        
         except Exception as e:
             db.session.rollback()  # Revertir en caso de error
             return jsonify({'message': 'Error al realizar el pedido', 'error': str(e)}), 500
-            
-            db.session.commit()
-            return jsonify({'message': 'Pedido realizado exitosamente'})
-        except Exception as e:
-            db.session.rollback()  # Revertir en caso de error
-            return jsonify({'message': 'Error al realizar el pedido', 'error': str(e)}), 500
+        
 
     @app.route('/pedido/<int:id_pedido>/state', methods=['PUT'])
     def actualizar_estado(id_pedido):
