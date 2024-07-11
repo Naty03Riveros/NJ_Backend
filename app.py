@@ -1,9 +1,10 @@
 from flask import Flask, request, jsonify, render_template,redirect, url_for,session
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from config import Config
-from models import db, Vino, Cliente, Pedido, DetallePedido
+from models import db, Vino, Cliente, Pedido, DetallePedido,Evento
 
 def create_app():
     app = Flask(__name__)
@@ -22,11 +23,26 @@ def create_app():
     def tienda():
         vinos = Vino.query.all()
         return render_template('Tienda.html', vinos=vinos)
-
+    
+    #Reservas-Eventos
     @app.route('/eventos')
     def eventos():
-        return render_template('Eventos.html')
+        eventos = Evento.query.all()
+        return render_template('Eventos.html',eventos=eventos)
     
+    @app.route('/reservar/<int:evento_id>', methods=['POST'])
+    def reservar(evento_id):
+        evento = Evento.query.get_or_404(evento_id)
+        # cliente_id = request.form['cliente_id']  # Si tienes autenticación, usa esto.
+        cantidad = int(request.form['cantidad'])
+        total = cantidad * evento.precio
+
+        nueva_reserva = Reserva(id_evento=evento_id, cantidad=cantidad, total=total)
+        db.session.add(nueva_reserva)
+        db.session.commit()
+    
+        return redirect(url_for('eventos'))
+
     @app.route('/cart')
     def cart():
         return 'Esta es la página del carrito.'
@@ -45,7 +61,7 @@ def create_app():
             )
             db.session.add(new_cliente)
             db.session.commit()
-            return jsonify({'message': 'Cliente registrado exitosamente'})
+            return redirect(url_for('login'))
         return render_template('Registro.html')
 
     @app.route('/login', methods=['GET', 'POST'])
@@ -239,6 +255,8 @@ def create_app():
         db.session.commit()
 
         return jsonify({'message': 'Producto agregado al carrito exitosamente'}), 200
+    
+    #Inicio de la reserva de eventos
 
     return app
 

@@ -21,12 +21,18 @@
 
     <!-- Custom JavaScript -->
     <script src="{{ url_for('static', filename='eventos.js') }}"></script>
+    
     <style>
-        /* Agrega un margen superior al título de la página para evitar que se mezcle con la barra de navegación */
         .title-format {
-            margin-top: 150px; /* Ajusta este valor según sea necesario para evitar la superposición */
+            margin-top: 90px; /* Ajusta este valor según sea necesario */
+        }
+        .subtitle-format {
+            margin-top: 10px; /* Ajusta este valor según sea necesario */
         }
     </style>
+    
+    
+  
 </head>
 <body>
     <script src="{{ url_for('static', filename='main.js') }}"></script>
@@ -62,18 +68,39 @@
                     </li>
                 </ul>
             </div>
+            <div class="ml-auto">
+                <ul class="navbar-nav">
+                    {% if session.get('cliente_nombre') %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">{{ session['cliente_nombre'] }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('logout') }}">Cerrar sesión</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">Mi cuenta</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('register') }}">Registrarse</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
     </nav>
     <main>
-
-        <!-- Sección de Eventos -->
         
+
+        <!-- Sección de Eventos --->
+       
         <div class="container my-5">
             <div class="text-center mb-4">
                 <h2 class="title-format">Eventos</h2>
                 <p class="subtitle-format">Descubre experiencias únicas en nuestras bodegas</p>
             </div>
             <div class="row">
+                
                 <div class="col-md-6 mb-4">
                     <div class="card">
                         <img src="{{ url_for('static', filename='src/Event_tasting.webp') }}" class="card-img-top" alt="Evento 1">

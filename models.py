@@ -58,6 +58,7 @@ class Evento(db.Model):
     lugar = db.Column(db.String(255))
     capacidad = db.Column(db.Integer)
     precio = db.Column(db.Numeric(10, 2))
+    imagen_url = db.Column(db.String(255))  # Nuevo campo para la URL de la imagen
 
 class Reserva(db.Model):
     __tablename__ = 'reservas'
