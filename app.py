@@ -4,7 +4,7 @@ from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from config import Config
-from models import db, Vino, Cliente, Pedido, DetallePedido,Evento
+from models import db, Vino, Cliente, Pedido, DetallePedido,Evento,Reserva
 
 def create_app():
     app = Flask(__name__)
@@ -25,24 +25,61 @@ def create_app():
         return render_template('Tienda.html', vinos=vinos)
     
     #Reservas-Eventos
+
+    
     @app.route('/eventos')
     def eventos():
         eventos = Evento.query.all()
         return render_template('Eventos.html',eventos=eventos)
     
-    @app.route('/reservar/<int:evento_id>', methods=['POST'])
+    @app.route('/verify_images')
+    def verify_images():
+        eventos = Evento.query.all()
+        for evento in eventos:
+            print(f"Event: {evento.nombre}, Image URL: {evento.imagen_url}")
+        return "Check your console for the image URLs."
+
+        
+    @app.route('/reservar/<int:evento_id>', methods=['GET', 'POST'])
     def reservar(evento_id):
+        if 'cliente_id' not in session:
+            return redirect(url_for('login'))
+
         evento = Evento.query.get_or_404(evento_id)
-        # cliente_id = request.form['cliente_id']  # Si tienes autenticación, usa esto.
-        cantidad = int(request.form['cantidad'])
-        total = cantidad * evento.precio
+        
+        if request.method == 'POST':
+            cliente_id = session['cliente_id']
+            cantidad = int(request.form['cantidad'])
+            total = cantidad * evento.precio
 
-        nueva_reserva = Reserva(id_evento=evento_id, cantidad=cantidad, total=total)
-        db.session.add(nueva_reserva)
-        db.session.commit()
+            nueva_reserva = Reserva(
+                id_evento=evento_id,
+                id_cliente=cliente_id,
+                cantidad=cantidad,
+                total=total
+            )
+            db.session.add(nueva_reserva)
+            db.session.commit()
+        
+            return redirect(url_for('eventos'))
+
+        return render_template('Reserva.html', evento=evento)
     
-        return redirect(url_for('eventos'))
+    @app.route('/api/reservas', methods=['GET'])
+    def obtener_reservas():
+        if 'cliente_id' not in session:
+            return jsonify([])
 
+        cliente_id = session['cliente_id']
+        reservas = Reserva.query.filter_by(id_cliente=cliente_id).all()
+        resultado = [{
+            'id_reserva': reserva.id_reserva,
+            'nombre_evento': reserva.evento.nombre,
+            'cantidad': reserva.cantidad,
+            'total': reserva.total
+        } for reserva in reservas]
+        return jsonify(resultado)
+    
     @app.route('/cart')
     def cart():
         return 'Esta es la página del carrito.'
